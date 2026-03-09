@@ -1,1 +1,1 @@
-O Trabalho consistia em criar uma situação para aplicar os conceitos de diagrama de entidade relacionamento, modelo relacional e consultas e inserções SQL(presentes aqui). O Tema escolhido foi uma biblioteca,
+O Trabalho consistia em criar uma situação para aplicar os conceitos de diagrama de entidade relacionamento, modelo relacional e consultas e inserções SQL(presentes aqui). O Tema escolhido foi uma biblioteca.
