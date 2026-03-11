@@ -1,0 +1,147 @@
+-- 1 - Projetar o título de cada livro da tabela Livro.
+
+SELECT titulo from livro;
+
+-- 2 - Projetar o nome e cidade das editoras que são do Brasil.
+
+SELECT nome, cidade FROM editora WHERE país = 'Brasil';
+
+-- 3 - Gere uma lista única, contendo tanto o nome e email dos alunos quanto dos funcionários.
+
+SELECT nome, email FROM aluno
+UNION
+SELECT nome, email FROM funcionario;
+
+-- 4 - A coordenação da biblioteca deseja realizar uma campanha de incentivo à leitura. Para isso, precisa identificar o nome dos alunos que nunca realizaram nenhum empréstimo na biblioteca.
+
+SELECT nome
+FROM aluno
+WHERE id_aluno NOT IN(SELECT id_aluno FROM Emprestimo);
+
+-- 5 - A biblioteca precisa identificar pessoas que possuem duplo vínculo com a instituição. Mostre os nomes das pessoas que estão cadastradas simultaneamente na tabela de Alunos e na tabela de Funcionários (verificando possíveis homônimos).
+
+SELECT nome
+FROM Aluno
+WHERE nome IN (SELECT nome FROM  Funcionario);
+
+-- 6 - Gere uma lista com o título e o ano de publicação de todos os livros que foram lançados depois do livro  '1984'.
+
+SELECT titulo, ano_pub
+FROM Livro
+WHERE ano_pub >(SELECT ano_pub FROM Livro WHERE titulo = '1984');
+
+-- 7 -  a) Mostre uma lista com os livros disponíveis no acervo que foram publicados por editoras brasileiras.
+
+SELECT titulo
+FROM Livro
+WHERE id_editora IN (SELECT id_editora FROM  Editora WHERE país = 'Brasil');
+
+--b) Mostre quais livros foram publicados após o lançamento de pelo menos um dos livros da editora ‘Rocco’.
+
+SELECT titulo, ano_pub
+FROM Livro
+WHERE ano_pub > ANY (SELECT ano_pub FROM Livro WHERE id_editora = 1);
+
+-- c) Liste os nomes dos Autores que possuem pelo menos um livro cadastrado no sistema.
+
+SELECT nome
+FROM Autor
+WHERE EXISTS (SELECT * FROM  LivroAutor WHERE LivroAutor.id_autor  = Autor.id_autor);
+
+-- d) Mostre qual livro foi publicado depois de todos os livros da editora 'Companhia das Letras'.
+
+SELECT titulo, ano_pub
+FROM Livro
+WHERE ano_pub > ALL(SELECT ano_pub FROM Livro WHERE id_editora = 2);
+
+-- 8 - Liste os empréstimos realizados pela mesma dupla de Aluno e Funcionário do empréstimo de ID 1.
+
+SELECT id_emprestimo, data_emp, data_prevista
+FROM Emprestimo
+WHERE (id_aluno, id_funcionario) IN (select id_aluno, id_funcionario
+FROM Emprestimo WHERE id_emprestimo = 1);
+
+-- 9 - Gere um relatório listando o nome de todos os funcionários cadastrados e, ao lado, os IDs dos empréstimos que eles realizaram.
+
+SELECT E.id_emprestimo, F.nome
+FROM Emprestimo E
+RIGHT JOIN Funcionario F ON E.id_funcionario = F.id_funcionario;
+
+-- 10 - Gere a lista completa de Editoras cadastradas e os títulos dos livros que temos de cada uma.
+
+SELECT E.nome AS nome_editora, L.titulo AS titulo_livro
+FROM Editora E
+LEFT JOIN Livro L on E.id_editora = L.id_editora;
+
+-- 11 - Gere uma lista com o número total de empréstimos já realizados na história da biblioteca, independentemente de quem os fez.
+
+SELECT COUNT(*) AS Total_Geral_Emprestimos
+FROM  Emprestimo;
+
+-- 12 - Liste o nome de cada Editora e a quantidade de livros associados a ela no sistema.
+
+SELECT E.nome AS Nome_Editora,
+    COUNT(L.id_livro) AS Qtd_Livros
+FROM Editora E
+ JOIN Livro L ON E.id_editora = L.id_editora
+GROUP BY E.nome;
+
+-- 13 - Gere um relatório agrupado por Nome do Aluno que mostre duas informações simultaneamente a quantidade de itens que o aluno já devolveu e o valor total das multas acumuladas por esse aluno.
+
+SELECT A.nome AS Nome_Aluno,
+    COUNT(I.id_exemplar) AS Qtd_Itens_Devolvidos,
+    SUM(I.multa) AS Total_Multas_Pagas
+FROM Aluno A
+JOIN Emprestimo E ON A.id_aluno = E.id_aluno
+JOIN ItemEmprestimo I ON E.id_emprestimo = I.id_emprestimo
+GROUP BY A.nome;
+
+-- 14 - Gere um relatório agrupado por nome do aluno que mostre o total de multas acumuladas, filtrando apenas os alunos cujo total de dívida seja maior que zero.
+
+SELECT A.nome,
+    SUM(I.multa) AS Total_Divida
+FROM Aluno A
+JOIN Emprestimo E ON A.id_aluno = E.id_aluno
+JOIN ItemEmprestimo I ON E.id_emprestimo = I.id_emprestimo
+GROUP BY A.nome HAVING SUM(I.multa) > 0;
+
+-- 15 - Gere uma lista que mostre o nome do aluno e a data prevista de devolução de seus empréstimos. A lista deve conter apenas os alunos que efetivamente realizaram algum empréstimo.
+
+SELECT A.nome AS Nome_Aluno,
+    E.data_prevista
+FROM Aluno A
+JOIN Emprestimo E ON  A.id_aluno = E.id_aluno;
+
+-- 16 - Gere um relatório que mostre o Nome do Aluno, a Data do Empréstimo e o Nome do Funcionário responsável por aquele atendimento.
+
+SELECT A.nome AS Nome_Aluno,
+    E.data_emp AS Data_Emprestimo,
+    F.nome AS Nome_Funcionario
+FROM Aluno A
+JOIN Emprestimo E ON A.id_aluno = E.id_aluno
+JOIN  Funcionario F ON E.id_funcionario = F.id_funcionario;
+
+-- 17 -  Liste o Título do Livro, o Estado de Conservação do exemplar, a Data que foi emprestado e a Data que foi devolvido.
+
+SELECT L.titulo AS Titulo_Livro,
+    Ex.estado_conservacao AS Estado_Exemplar,
+    E.data_emp AS Data_Saida,
+    I.data_dev AS Data_Devolucao
+FROM Livro L
+JOIN Exemplar Ex ON L.id_livro = Ex.id_livro
+JOIN ItemEmprestimo I ON Ex.id_exemplar = I.id_exemplar
+JOIN Emprestimo E ON I.id_emprestimo = E.id_emprestimo;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
